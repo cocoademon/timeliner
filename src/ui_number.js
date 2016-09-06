@@ -80,6 +80,9 @@ function NumberUI(config) {
 		}
 		value = clamp(value + inc);
 		fireChange();
+
+		// Don't zoom or scroll
+		e.preventDefault();
 	})
 
 	handleDrag(span, onDown, onMove, onUp);

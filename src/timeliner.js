@@ -9,6 +9,7 @@ var undo = require('./util_undo'),
 	UndoState = undo.UndoState,
 	Settings = require('./settings'),
 	utils = require('./utils'),
+	Color = require('./util_color'),
 	LayerCabinet = require('./view_layer_cabinet'),
 	TimelinePanel = require('./view_panel'),
 	package_json = require('../package.json'),
@@ -29,7 +30,7 @@ function LayerProp(name) {
 
 	this._value = 0;
 
-	this._color = '#' + (Math.random() * 0xffffff | 0).toString(16);
+	this._color = Color.random();
 	/*
 	this.max
 	this.min
@@ -73,7 +74,7 @@ function Timeliner(target) {
 			layer.values.splice(v, 0, {
 				time: t,
 				value: value,
-				_color: '#' + (Math.random() * 0xffffff | 0).toString(16)
+				_color: Color.random()
 			});
 
 			undo_manager.save(new UndoState(data, 'Add Keyframe'));
@@ -104,7 +105,7 @@ function Timeliner(target) {
 			layer.values.splice(v, 0, {
 				time: t,
 				value: value,
-				_color: '#' + (Math.random() * 0xffffff | 0).toString(16)
+				_color: Color.random()
 			});
 			if (!dont_save) undo_manager.save(new UndoState(data, 'Add value'));
 		} else {
@@ -424,7 +425,10 @@ function Timeliner(target) {
 		color: Theme.d,
 		zIndex: Z_INDEX,
 		fontFamily: 'monospace',
-		fontSize: '12px'
+		fontSize: '12px',
+		'-ms-user-select': 'none',
+		'-moz-user-select': 'none',
+		'-webkit-user-select': 'none'
 	});
 
 

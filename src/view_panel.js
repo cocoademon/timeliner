@@ -6,7 +6,8 @@ var
 	Tweens = require('./util_tween'),
 	handleDrag = require('./util_handle_drag'),
 	ScrollCanvas = require('./view_time_scroller'),
-	Canvas = require('./ui_canvas')
+	Canvas = require('./ui_canvas'),
+	Color = require('./util_color')
 	;
 
 var
@@ -123,16 +124,47 @@ function TimelinePanel(data, dispatcher) {
 	function EasingRect(x1, y1, x2, y2, frame, frame2, values, layer, j) {
 		var self = this;
 
+		var dx = x2 - x1;
+		var dy = y2 - y1;
+
 		this.path = function() {
 			ctx_wrap.beginPath()
 			.rect(x1, y1, x2-x1, y2-y1)
 			.closePath();
 		};
 
+		var tweenYforX = function(x) {
+			return y2 - Tweens[frame.tween]((x - x1) / dx) * dy;
+		}
+
+		this.tweenPath = function() {
+			// draw easing graph
+			
+			// most tweens are pretty smooth, so limit number of line segments
+			var xStep = Math.max(1, dx / Settings.TWEEN_DRAW_SEGMENTS);
+
+			ctx_wrap
+				.beginPath()
+				.moveTo(x1, tweenYforX(x1))
+			
+			for (var drawX = x1; drawX < x2; drawX += xStep) {
+				ctx_wrap.lineTo(drawX, tweenYforX(drawX));
+			}
+
+			ctx_wrap.lineTo(x2, tweenYforX(x2))
+		}
+
+
 		this.paint = function() {
 			this.path();
 			ctx.fillStyle = frame._color;
 			ctx.fill();
+
+			if (frame.tween) {
+				this.tweenPath();
+				ctx.strokeStyle = Color.standout(frame._color);
+				ctx.stroke();
+			}
 		};
 
 		this.mouseover = function() {
@@ -258,23 +290,7 @@ function TimelinePanel(data, dispatcher) {
 
 				renderItems.push(new EasingRect(x, y1, x2, y2, frame, frame2));
 
-				// // draw easing graph
-				// var color = parseInt(frame._color.substring(1,7), 16);
-				// color = 0xffffff ^ color;
-				// color = color.toString(16);           // convert to hex
-				// color = '#' + ('000000' + color).slice(-6);
-
-				// ctx.strokeStyle = color;
-				// var x3;
-				// ctx.beginPath();
-				// ctx.moveTo(x, y2);
-				// var dy = y1 - y2;
-				// var dx = x2 - x;
-
-				// for (x3=x; x3 < x2; x3++) {
-				// 	ctx.lineTo(x3, y2 + Tweens[frame.tween]((x3 - x)/dx) * dy);
-				// }
-				// ctx.stroke();
+				
 			}
 
 			for (j = 0; j < values.length; j++) {
